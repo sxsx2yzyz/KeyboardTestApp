@@ -4,7 +4,7 @@ This repository contains a minimal reproduction of issues with `react-native-key
 
 ## Issues Reproduced
 
-###1ardEvents Behavior with Different windowSoftInputMode Settings
+### 1. KeyboardEvents Behavior with Different windowSoftInputMode Settings
 
 **Problem**: When `android:windowSoftInputMode` is set to `adjustPan`, `KeyboardEvents` only triggers once instead of properly tracking keyboard show/hide events.
 
@@ -26,11 +26,11 @@ This repository contains a minimal reproduction of issues with `react-native-key
 
 ## Screenshots
 
-### Issue1eyboardEvents with adjustPan
-![KeyboardEvents adjustPan Issue](https://github.com/your-username/KeyboardTestApp/assets/your-username/4511752717442ic.jpg)
+### Modal fully visible (keyboard hidden)
+![Modal with keyboard hidden](./4511752717442_.pic.jpg)
 
-### Issue 2: KeyboardAvoidingView with Modals
-![KeyboardAvoidingView Modal Issue](https://github.com/your-username/KeyboardTestApp/assets/your-username/4521752717450pic.jpg)
+### Modal covered by keyboard (KeyboardAvoidingView not working)
+![Modal covered by keyboard - KeyboardAvoidingView not working](./4521752717450_.pic.jpg)
 
 ## Setup
 
@@ -38,27 +38,31 @@ This repository contains a minimal reproduction of issues with `react-native-key
 2. Install dependencies:
    ```bash
    npm install
-   ```3. Run on Android:
+   ```
+3. Run on Android:
    ```bash
    npm run android
    ```
 
 ## Test Instructions
-1 **Test Issue 1**: 
-   - Open the app and tapOpen Modal"
+1. **Test Issue 1**: 
+   - Open the app and tap "Open Modal"
    - Focus the text input in the modal
    - Observe that keyboard events are tracked correctly with `adjustResize`
    - Change `android:windowSoftInputMode` to `adjustPan` in `android/app/src/main/AndroidManifest.xml`
    - Rebuild and test again - notice `KeyboardEvents` only triggers once
-2. **Test Issue 2  - Open the modal and focus the text input
-   - Notice that the `KeyboardAvoidingView` doesnt properly adjust the layout
+2. **Test Issue 2**
+   - Open the modal and focus the text input
+   - Notice that the `KeyboardAvoidingView` doesn't properly adjust the layout
    - The input field gets covered by the keyboard instead of being pushed up
 
 ## Environment
 
-- React Native: 0.78- react-native-keyboard-controller: 1.17.5- react-native-modalfy: 3.6
-- react-native-reanimated: 3.170.5
-- Android API:29roid 10)
+- React Native: 0.78.0
+- react-native-keyboard-controller: 1.17.5
+- react-native-modalfy: 3.6.0
+- react-native-reanimated: 3.17.5
+- Android API: 29 (Android 10)
 
 ## Files Modified
 
@@ -67,11 +71,13 @@ This repository contains a minimal reproduction of issues with `react-native-key
 
 ## Related Issues
 
-- GitHub Issue #1019https://github.com/kirillzyusko/react-native-keyboard-controller/issues/1019)
+- GitHub Issue #1019: https://github.com/kirillzyusko/react-native-keyboard-controller/issues/1019
 
-## Reproduction Steps1he app shows three keyboard height values:
+## Reproduction Steps
+1. The app shows three keyboard height values:
    - `RNKeyboardEventHeight`: Native React Native keyboard events
    - `KeyboardEventsWillShowHeight`: react-native-keyboard-controller willShow events
-   - `KeyboardEventsDidShowHeight`: react-native-keyboard-controller didShow events2n keyboard appears, these values should update to show the keyboard height
-3 With `adjustPan`, only the first event triggers, subsequent events don't fire
+   - `KeyboardEventsDidShowHeight`: react-native-keyboard-controller didShow events
+2. When keyboard appears, these values should update to show the keyboard height
+3. With `adjustPan`, only the first event triggers, subsequent events don't fire
 4. The modal's `KeyboardAvoidingView` doesn't work properly, leaving the input field covered by the keyboard
