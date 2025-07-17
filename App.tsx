@@ -5,127 +5,125 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
+  Button,
+  Dimensions,
+  Keyboard,
   Text,
-  useColorScheme,
+  TextInput,
   View,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardAvoidingView, KeyboardEvents, KeyboardProvider, useResizeMode } from 'react-native-keyboard-controller';
+import { createModalStack, modalfy, ModalProvider } from 'react-native-modalfy';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
+const InputModal = () => {
+  const [RNKeyboardEventHeight, setRNKeyboardEventHeight] = useState<number | null>(null);
+  const [KeyboardEventsWillShowHeight, setKeyboardEventsWillShowHeight] = useState<number | null>(null);
+  const [KeyboardEventsDidShowHeight, setKeyboardEventsDidShowHeight] = useState<number | null>(null);
+  useResizeMode();
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setRNKeyboardEventHeight(e.endCoordinates.height);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setRNKeyboardEventHeight(0);
+    });
+    const keyboardEventsWillShowListener = KeyboardEvents.addListener('keyboardWillShow', (e) => {
+      setKeyboardEventsWillShowHeight(e.height);
+    });
+    const keyboardEventsWillHideListener = KeyboardEvents.addListener('keyboardWillHide', () => {
+      setKeyboardEventsWillShowHeight(0);
+    });
+    const keyboardEventsDidShowListener = KeyboardEvents.addListener('keyboardDidShow', (e) => {
+      setKeyboardEventsDidShowHeight(e.height);
+    });
+    const keyboardEventsDidHideListener = KeyboardEvents.addListener('keyboardDidHide', () => {
+      setKeyboardEventsDidShowHeight(0);
+    });
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+      keyboardEventsWillShowListener.remove();
+      keyboardEventsWillHideListener.remove();
+      keyboardEventsDidShowListener.remove();
+      keyboardEventsDidHideListener.remove();
+    }
+  }, []);
 
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <KeyboardAvoidingView
+      behavior="padding"
+    style={{
+      width: Dimensions.get('window').width,
+      height: 400,
+      backgroundColor: '#fff',
+      borderRadius: 16,
+      padding: 20,
+      overflow: 'hidden',
+    }}>
+      <Text>RNKeyboardEventHeight: {RNKeyboardEventHeight}</Text>
+      <Text>KeyboardEventsWillShowHeight: {KeyboardEventsWillShowHeight}</Text>
+      <Text>KeyboardEventsDidShowHeight: {KeyboardEventsDidShowHeight}</Text>
+      <TextInput style={{
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+      }}
+        placeholder='Enter your name'
+        placeholderTextColor='gray'
+        autoFocus={true}
+        keyboardType="default"
+        returnKeyType="done"
+        secureTextEntry={false}
+        value='not avoid keyboard'
       />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </View>
-  );
+      <Button title="Close" onPress={() => {
+        modalfy().closeModal();
+      }} />
+    </KeyboardAvoidingView>
+  )
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+const stack = createModalStack({
+  InputModal: {
+    modal: InputModal,
+    position: "center"
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+}, {
 });
-
+function App(): React.JSX.Element {
+  return (
+    <GestureHandlerRootView>
+      <KeyboardProvider>
+        <ModalProvider stack={stack}>
+          <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <Button title="Open Modal" onPress={() => {
+              modalfy().openModal('InputModal');
+            }} />
+          </View>
+          {/* <KeyboardAvoidingView behavior="padding">
+            <TextInput style={{
+              height: 40,
+              borderColor: 'gray',
+              borderWidth: 1,
+            }}
+            value='avoid keyboard'
+            />
+            <View style = {{
+              height: 100,
+              backgroundColor: 'red',
+            }}/>
+          </KeyboardAvoidingView> */}
+        </ModalProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
+  )
+}
 export default App;
